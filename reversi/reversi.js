@@ -92,8 +92,8 @@ module.exports = function () {
                 score = 0;
                 if (move_flip_count > 0) {
 
-                    score += 1; // for having flip count greater than 0
-                    move_stats['score'] += 1;
+                    score += move_flip_count; // for having flip count greater than 0
+                    move_stats['score'] += move_flip_count;
 
                     // increment score by 5 if it is corner
                     // increment score by 3 if it is second_square
@@ -118,20 +118,13 @@ module.exports = function () {
                     else if (this.contains_square(fourth_squares, move_stats['move'])) {
                         score += Number.NEGATIVE_INFINITY;
                         move_stats['score'] -= 100;
-                        move_stats['score'] += move_flip_count;
                     }
 
                     else if (this.contains_square(diagonal_adj_squares, move_stats['move'])) {
                         score += Number.NEGATIVE_INFINITY;
                         move_stats['score'] -= 200;
-                        move_stats['score'] += move_flip_count;
                     }
 
-
-                    if (move_flip_count > count) {
-                        count = move_flip_count;
-                        score += count;
-                    }
 
                     if (score > highest_score) {
                         highest_score = score;
