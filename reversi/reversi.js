@@ -76,41 +76,55 @@ module.exports = function () {
         corners = [[0,0], [0,7], [7,0], [7,7]];
         second_squares = [[0,2], [0,5], [2,0], [2,7], [5,0], [5,7], [7,2], [7,5]];
         third_squares = [[2,2], [2,5], [5,2], [5,5]];
-        fourth_squares = [[0,1], [0,6], [1,0], [1,1], [1,6], [1,7], [6,0], [6,1], [6,6], [6,7], [7,1], [7,6]];
+        fourth_squares = [[0,1], [0,6], [1,0], [1,7], [6,0], [6,7], [7,1], [7,6]];
+        diagonal_adj_squares = [[1,1], [1,6], [6,1], [6,6]];
         count = 0;
         best_move = [0,0];
         highest_score = Number.NEGATIVE_INFINITY;
         available_moves = [];
 
-
         for(var row=0; row<8; row++) {
             for (var col=0; col<8; col++) {
-                var move = [row,col];
-                move_flip_count = this.total_no_flipped_pieces(player,board,move);
+                let move_stats = {};
+                move_stats['move'] = [row,col];
+                move_stats['score'] = 0;
+                move_flip_count = this.total_no_flipped_pieces(player,board,move_stats['move']);
                 score = 0;
                 if (move_flip_count > 0) {
-                    available_moves.push(move);
+
                     score += 1; // for having flip count greater than 0
+                    move_stats['score'] += 1;
 
                     // increment score by 5 if it is corner
                     // increment score by 3 if it is second_square
                     // increment score by 2 if it is third_square
                     // decrement score by 1 if it is fourth_square
 
-                    if (this.contains_square(corners, move)) {
+                    if (this.contains_square(corners, move_stats['move'])) {
                         score += 5;
+                        move_stats['score'] += 5;
                     }
 
-                    else if (this.contains_square(second_squares, move)) {
+                    else if (this.contains_square(second_squares, move_stats['move'])) {
                         score += 3;
+                        move_stats['score'] += 3;
                     }
 
-                    else if (this.contains_square(third_squares, move)) {
+                    else if (this.contains_square(third_squares, move_stats['move'])) {
                         score += 2;
+                        move_stats['score'] += 2;
                     }
 
-                    else if (this.contains_square(fourth_squares, move)) {
+                    else if (this.contains_square(fourth_squares, move_stats['move'])) {
                         score += Number.NEGATIVE_INFINITY;
+                        move_stats['score'] -= 100;
+                        move_stats['score'] += move_flip_count;
+                    }
+
+                    else if (this.contains_square(diagonal_adj_squares, move_stats['move'])) {
+                        score += Number.NEGATIVE_INFINITY;
+                        move_stats['score'] -= 200;
+                        move_stats['score'] += move_flip_count;
                     }
 
 
@@ -121,9 +135,10 @@ module.exports = function () {
 
                     if (score > highest_score) {
                         highest_score = score;
-                        best_move = move;
+                        best_move = move_stats['move'];
                     }
 
+                    available_moves.push(move_stats);
 
                 }
             }
@@ -131,8 +146,13 @@ module.exports = function () {
 
 
         if (highest_score === Number.NEGATIVE_INFINITY) {
-            if (available_moves.length > 0) {
-                best_move = available_moves[0];
+
+            let score = Number.NEGATIVE_INFINITY;
+            for (let i=0; i<available_moves.length; i++) {
+                if (available_moves[i]['score'] > score) {
+                    best_move = available_moves[i]['move'];
+                    score = available_moves[i]['score'];
+                }
             }
         }
 
