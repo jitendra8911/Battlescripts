@@ -141,7 +141,12 @@ module.exports = function () {
         if (highest_score === Number.NEGATIVE_INFINITY) {
 
             let score = Number.NEGATIVE_INFINITY;
+            console.log(available_moves);
             for (let i=0; i<available_moves.length; i++) {
+                if (this.verify_if_opponent_gets_corner(player, board, available_moves[i]['move'], corners)) {
+                    console.log('yes opponent is going to get a corner with your move ' + available_moves[i]['move']);
+                    available_moves[i]['score'] -= 300;
+                }
                 if (available_moves[i]['score'] > score) {
                     best_move = available_moves[i]['move'];
                     score = available_moves[i]['score'];
@@ -160,6 +165,29 @@ module.exports = function () {
         square = JSON.stringify(square);
 
         return squares.includes(square);
+    };
+
+    this.verify_if_opponent_gets_corner = function(player, board, move, corners) {
+        board_copy = this.iterationCopy(board);
+        board_copy[move[0]][move[1]] = player;
+
+        for (let i=0; i <corners.length; i++) {
+            if (this.is_valid(1-player,board_copy,corners[i])) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    this.iterationCopy = function(src) {
+        let target = {};
+        for (let prop in src) {
+            if (src.hasOwnProperty(prop)) {
+                target[prop] = src[prop];
+            }
+        }
+        return target;
     }
 
-}
+};
